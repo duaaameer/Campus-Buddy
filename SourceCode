@@ -1,0 +1,831 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// AccountValidation----Using Binary Search Tree
+struct YearNode {
+    string year;
+    YearNode* left;
+    YearNode* right;
+    YearNode(string y) : year(y), left(NULL), right(NULL) {}
+};
+
+class AccountValidation {
+private:
+    YearNode* root;
+
+    YearNode* insert(YearNode* node, string year) {
+        if (node == NULL) return new YearNode(year);
+        if (year < node->year) node->left = insert(node->left, year);
+        else if (year > node->year) node->right = insert(node->right, year);
+        return node;
+    }
+
+    bool search(YearNode* node, string year) {
+        if (node == NULL) return false;
+        if (year == node->year) return true;
+        if (year < node->year) return search(node->left, year);
+        else return search(node->right, year);
+    }
+
+public:
+    AccountValidation() {
+        root = NULL;
+        root = insert(root, "2021");
+        insert(root, "2022");
+        insert(root, "2023");
+        insert(root, "2024");
+    }
+
+    bool validatePassword(string password) {
+        if (password.length() < 7) return false;
+        string firstFour = password.substr(0, 4);
+        return search(root, firstFour);
+    }
+
+    void validate() {
+        string username, password;
+        cout << "Enter Username: ";
+        cin >> username;
+        cout << "Enter Password: ";
+        cin >> password;
+
+        if (validatePassword(password)) {
+            cout << "WELCOME!" << endl;
+        } else {
+            cout << "Invalid! You are not a registered student." << endl;
+            exit(0); // Exit if login fails
+        }
+    }
+};
+
+// Function to clear the screen ---- Provide better UI
+void clearScreen() {
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
+}
+
+// displaying the dashboard
+void showDashboard() {
+    clearScreen();
+    cout << "===== CAMPUS BUDDY DASHBOARD =====" << endl;
+    cout << "1: GIK General Store" << endl;
+    cout << "2: GIK Food Court" << endl;
+    cout << "3: GIK Bus Reservation" << endl;
+    cout << "4: GIK Mess Management" << endl;
+    cout << "5: GIK Important Timings" << endl;
+    cout << "6: GIK Lost and Found" << endl;
+    cout << "7: GIK Complain/Feedback" << endl;
+    cout << "B: Back to Dashboard" << endl;
+    cout << "X: Exit" << endl;
+    cout << "===============================" << endl;
+}
+
+class GIKgeneralStore {
+private:
+    struct Product {
+        string name;
+        double price;
+        string unit;
+    };
+
+    // Dynamic arrays for product categories
+    Product* dairyProducts;
+    Product* fruitProducts;
+    Product* vegetableProducts;
+    Product* miscProducts;
+    
+    int dairyCapacity = 10;
+    int fruitCapacity = 10;
+    int vegetableCapacity = 10;
+    int miscCapacity = 10;
+    
+    int dairyCount = 0;
+    int fruitCount = 0;
+    int vegetableCount = 0;
+    int miscCount = 0;
+    
+    struct CartItem {
+        Product product;
+        double quantity;
+    };
+    
+    CartItem* cart;
+    int cartCapacity = 50;
+    int cartCount = 0;
+    double totalAmount = 0;
+    
+    void initializeProducts() {
+        // Allocate memory for product categories
+        dairyProducts = new Product[dairyCapacity];
+        fruitProducts = new Product[fruitCapacity];
+        vegetableProducts = new Product[vegetableCapacity];
+        miscProducts = new Product[miscCapacity];
+        
+        // Initialize cart
+        cart = new CartItem[cartCapacity];
+        
+        // Dairy Products
+        addDairyProduct("Milk", 350, "liter");
+        addDairyProduct("Butter", 500, "kg");
+        addDairyProduct("Bread", 250, "packet");
+        
+        // Fruits
+        addFruitProduct("Pomegranate", 400, "kg");
+        addFruitProduct("Mango", 300, "kg");
+        addFruitProduct("Banana", 200, "dozen");
+        addFruitProduct("Apples", 250, "kg");
+        
+        // Vegetables
+        addVegetableProduct("Potato", 200, "kg");
+        addVegetableProduct("Carrot", 250, "kg");
+        addVegetableProduct("Cucumber", 150, "kg");
+        
+        // Miscellaneous
+        addMiscProduct("Eggs", 120, "dozen");
+        addMiscProduct("Rice", 300, "kg");
+    }
+    
+    void resizeCategory(Product*& products, int& capacity, int count) {
+        int newCapacity = capacity * 2;
+        Product* newProducts = new Product[newCapacity];
+        
+        for (int i = 0; i < count; i++) {
+            newProducts[i] = products[i];
+        }
+        
+        delete[] products;
+        products = newProducts;
+        capacity = newCapacity;
+    }
+    
+    void addDairyProduct(string name, double price, string unit) {
+        if (dairyCount == dairyCapacity) {
+            resizeCategory(dairyProducts, dairyCapacity, dairyCount);
+        }
+        dairyProducts[dairyCount++] = {name, price, unit};
+    }
+    
+    void addFruitProduct(string name, double price, string unit) {
+        if (fruitCount == fruitCapacity) {
+            resizeCategory(fruitProducts, fruitCapacity, fruitCount);
+        }
+        fruitProducts[fruitCount++] = {name, price, unit};
+    }
+    
+    void addVegetableProduct(string name, double price, string unit) {
+        if (vegetableCount == vegetableCapacity) {
+            resizeCategory(vegetableProducts, vegetableCapacity, vegetableCount);
+        }
+        vegetableProducts[vegetableCount++] = {name, price, unit};
+    }
+    
+    void addMiscProduct(string name, double price, string unit) {
+        if (miscCount == miscCapacity) {
+            resizeCategory(miscProducts, miscCapacity, miscCount);
+        }
+        miscProducts[miscCount++] = {name, price, unit};
+    }
+    
+    void displayCategory(Product* products, int count) {
+        for (int i = 0; i < count; i++) {
+            cout << i+1 << ". " << products[i].name << " - " 
+                 << products[i].price << "/" << products[i].unit << endl;
+        }
+    }
+    
+    void addToCart(Product product, double quantity) {
+        if (cartCount == cartCapacity) {
+            cout << "Cart is full!" << endl;
+            return;
+        }
+        cart[cartCount++] = {product, quantity};
+        totalAmount += product.price * quantity;
+        cout << "Added to cart: " << quantity << " " << product.unit 
+             << " of " << product.name << endl;
+    }
+    
+    void displayCart() {
+        if (cartCount == 0) {
+            cout << "Your cart is empty!" << endl;
+            return;
+        }
+        
+        cout << "\n===== YOUR CART =====" << endl;
+        for (int i = 0; i < cartCount; i++) {
+            cout << cart[i].product.name << " - " << cart[i].quantity << " " 
+                 << cart[i].product.unit << " x " << cart[i].product.price 
+                 << " = " << cart[i].quantity * cart[i].product.price << endl;
+        }
+        cout << "TOTAL: " << totalAmount << endl;
+        cout << "=====================" << endl;
+    }
+    
+    void checkout() {
+        if (cartCount == 0) {
+            cout << "Cannot checkout - cart is empty!" << endl;
+            return;
+        }
+        
+        displayCart();
+        
+        int paymentMethod;
+        cout << "\nSelect payment method:" << endl;
+        cout << "1. Online" << endl;
+        cout << "2. Cash on Delivery" << endl;
+        cout << "Enter choice: ";
+        cin >> paymentMethod;
+        
+        if (paymentMethod == 1) {
+            cout << "Please send " << totalAmount << " to 03xx-xxxxxxx" << endl;
+        } else if (paymentMethod == 2) {
+            string address;
+            cout << "Enter delivery address: ";
+            cin.ignore();
+            getline(cin, address);
+            cout << "Order will be delivered to: " << address << endl;
+        } else {
+            cout << "Invalid payment method!" << endl;
+            return;
+        }
+        
+        cout << "\nThank you for shopping with us!" << endl;
+        cartCount = 0;
+        totalAmount = 0;
+    }
+
+public:
+    GIKgeneralStore() {
+        initializeProducts();
+    }
+    
+    ~GIKgeneralStore() {
+        // Clean up dynamically allocated memory
+        delete[] dairyProducts;
+        delete[] fruitProducts;
+        delete[] vegetableProducts;
+        delete[] miscProducts;
+        delete[] cart;
+    }
+    
+    void startShopping() {
+        int choice;
+        char continueShopping = 'y';
+        
+        do {
+            cout << "\n===== GIK GENERAL STORE =====" << endl;
+            cout << "1. Dairy Products" << endl;
+            cout << "2. Fruits" << endl;
+            cout << "3. Vegetables" << endl;
+            cout << "4. Miscellaneous Items" << endl;
+            cout << "5. View Cart" << endl;
+            cout << "6. Checkout" << endl;
+            cout << "7. Exit" << endl;
+            cout << "Enter your choice: ";
+            cin >> choice;
+            
+            switch(choice) {
+                case 1: {
+                    cout << "\nDAIRY PRODUCTS:" << endl;
+                    displayCategory(dairyProducts, dairyCount);
+                    if (dairyCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= dairyCount) {
+                            cout << "Enter quantity (" << dairyProducts[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(dairyProducts[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 2: {
+                    cout << "\nFRUITS:" << endl;
+                    displayCategory(fruitProducts, fruitCount);
+                    if (fruitCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= fruitCount) {
+                            cout << "Enter quantity (" << fruitProducts[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(fruitProducts[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 3: {
+                    cout << "\nVEGETABLES:" << endl;
+                    displayCategory(vegetableProducts, vegetableCount);
+                    if (vegetableCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= vegetableCount) {
+                            cout << "Enter quantity (" << vegetableProducts[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(vegetableProducts[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 4: {
+                    cout << "\nMISCELLANEOUS ITEMS:" << endl;
+                    displayCategory(miscProducts, miscCount);
+                    if (miscCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= miscCount) {
+                            cout << "Enter quantity (" << miscProducts[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(miscProducts[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 5:
+                    displayCart();
+                    break;
+                case 6:
+                    checkout();
+                    continueShopping = 'n'; // Exit after checkout
+                    break;
+                case 7:
+                    if (cartCount > 0) {
+                        cout << "\nYou have items in your cart!" << endl;
+                        displayCart();
+                        char confirm;
+                        cout << "Are you sure you want to exit without checking out? (y/n): ";
+                        cin >> confirm;
+                        if (confirm == 'n' || confirm == 'N') {
+                            continueShopping = 'y';
+                            break;
+                        }
+                    }
+                    cout << "Thank you for visiting!" << endl;
+                    continueShopping = 'n';
+                    break;
+                default:
+                    cout << "Invalid choice!" << endl;
+            }
+            
+            if (continueShopping == 'y' && choice != 6 && choice != 7) {
+                cout << "\nContinue shopping? (y/n): ";
+                cin >> continueShopping;
+            }
+            
+        } while (continueShopping == 'y' || continueShopping == 'Y');
+        
+        // If user chose to stop shopping but hasn't checked out
+        if (cartCount > 0 && continueShopping == 'n') {
+            cout << "\nProceeding to checkout..." << endl;
+            checkout();
+        }
+    }
+};
+
+
+#include <iostream>
+#include <string>
+using namespace std;
+
+class GIKFood {
+private:
+    struct Food {
+        string name;
+        double price;
+        string unit;
+    };
+
+    // Dynamic arrays for food categories
+    Food* desiFood;
+    Food* fastFood;
+    Food* chineseFood;
+    Food* drinks;
+    Food* desserts;
+    
+    int desiCapacity = 10;
+    int fastCapacity = 10;
+    int chineseCapacity = 10;
+    int drinksCapacity = 10;
+    int dessertsCapacity = 10;
+    
+    int desiCount = 0;
+    int fastCount = 0;
+    int chineseCount = 0;
+    int drinksCount = 0;
+    int dessertsCount = 0;
+    
+    struct CartItem {
+        Food food;
+        double quantity;
+    };
+    
+    CartItem* cart;
+    int cartCapacity = 50;
+    int cartCount = 0;
+    double totalAmount = 0;
+    
+    void initializeFoods() {
+        // Allocate memory for food categories
+        desiFood = new Food[desiCapacity];
+        fastFood = new Food[fastCapacity];
+        chineseFood = new Food[chineseCapacity];
+        drinks = new Food[drinksCapacity];
+        desserts = new Food[dessertsCapacity];
+        
+        // Initialize cart
+        cart = new CartItem[cartCapacity];
+        
+        // Desi Foods
+        addDesiFood("Biryani", 350, "Plate");
+        addDesiFood("Karhai", 400, "Plate");
+        addDesiFood("Korma", 300, "Plate");
+        addDesiFood("Daal Chawal", 150, "Plate");
+        addDesiFood("Nihari", 250, "Plate");
+        
+        // Fast Foods
+        addFastFood("Zinger Burger", 300, "Piece");
+        addFastFood("Pizza", 1400, "Large");
+        addFastFood("Fries", 200, "Regular");
+        addFastFood("Chicken Wings", 450, "6 Pieces");
+        addFastFood("Club Sandwich", 350, "Piece");
+        
+        // Chinese Foods
+        addChineseFood("Chinese Rice", 200, "Plate");
+        addChineseFood("Chow Mein", 250, "Plate");
+        addChineseFood("Hot & Sour Soup", 180, "Bowl");
+        addChineseFood("Spring Rolls", 220, "4 Pieces");
+        addChineseFood("Manchurian", 280, "Plate");
+        
+        // Drinks
+        addDrink("Mango Shake", 220, "Glass");
+        addDrink("Cold Coffee", 220, "Glass");
+        addDrink("Soft Drink", 80, "Can");
+        addDrink("Mineral Water", 60, "Bottle");
+        addDrink("Fresh Lime", 120, "Glass");
+        
+        // Desserts
+        addDessert("Gulab Jamun", 80, "Piece");
+        addDessert("Kheer", 120, "Bowl");
+        addDessert("Ice Cream", 150, "Scoop");
+        addDessert("Cake", 200, "Slice");
+        addDessert("Jalebi", 100, "100g");
+    }
+    
+    void resizeCategory(Food*& foods, int& capacity, int count) {
+        int newCapacity = capacity * 2;
+        Food* newFoods = new Food[newCapacity];
+        
+        for (int i = 0; i < count; i++) {
+            newFoods[i] = foods[i];
+        }
+        
+        delete[] foods;
+        foods = newFoods;
+        capacity = newCapacity;
+    }
+    
+    void addDesiFood(string name, double price, string unit) {
+        if (desiCount == desiCapacity) {
+            resizeCategory(desiFood, desiCapacity, desiCount);
+        }
+        desiFood[desiCount++] = {name, price, unit};
+    }
+    
+    void addFastFood(string name, double price, string unit) {
+        if (fastCount == fastCapacity) {
+            resizeCategory(fastFood, fastCapacity, fastCount);
+        }
+        fastFood[fastCount++] = {name, price, unit};
+    }
+    
+    void addChineseFood(string name, double price, string unit) {
+        if (chineseCount == chineseCapacity) {
+            resizeCategory(chineseFood, chineseCapacity, chineseCount);
+        }
+        chineseFood[chineseCount++] = {name, price, unit};
+    }
+    
+    void addDrink(string name, double price, string unit) {
+        if (drinksCount == drinksCapacity) {
+            resizeCategory(drinks, drinksCapacity, drinksCount);
+        }
+        drinks[drinksCount++] = {name, price, unit};
+    }
+    
+    void addDessert(string name, double price, string unit) {
+        if (dessertsCount == dessertsCapacity) {
+            resizeCategory(desserts, dessertsCapacity, dessertsCount);
+        }
+        desserts[dessertsCount++] = {name, price, unit};
+    }
+    
+    void displayCategory(Food* foods, int count) {
+        for (int i = 0; i < count; i++) {
+            cout << i+1 << ". " << foods[i].name << " - " 
+                 << foods[i].price << " Rs/" << foods[i].unit << endl;
+        }
+    }
+    
+    void addToCart(Food food, double quantity) {
+        if (cartCount == cartCapacity) {
+            cout << "Cart is full!" << endl;
+            return;
+        }
+        cart[cartCount++] = {food, quantity};
+        totalAmount += food.price * quantity;
+        cout << "Added to cart: " << quantity << " " << food.unit 
+             << " of " << food.name << endl;
+    }
+    
+    void displayCart() {
+        if (cartCount == 0) {
+            cout << "Your cart is empty!" << endl;
+            return;
+        }
+        
+        cout << "\n===== YOUR CART =====" << endl;
+        for (int i = 0; i < cartCount; i++) {
+            cout << cart[i].food.name << " - " << cart[i].quantity << " " 
+                 << cart[i].food.unit << " x " << cart[i].food.price 
+                 << " = " << cart[i].quantity * cart[i].food.price << " Rs" << endl;
+        }
+        cout << "TOTAL: " << totalAmount << " Rs" << endl;
+        cout << "=====================" << endl;
+    }
+    
+    void checkout() {
+        if (cartCount == 0) {
+            cout << "Cannot checkout - cart is empty!" << endl;
+            return;
+        }
+        
+        displayCart();
+        
+        int paymentMethod;
+        cout << "\nSelect payment method:" << endl;
+        cout << "1. Online" << endl;
+        cout << "2. Cash on Delivery" << endl;
+        cout << "Enter choice: ";
+        cin >> paymentMethod;
+        
+        if (paymentMethod == 1) {
+            cout << "Please send " << totalAmount << " Rs to 03xx-xxxxxxx" << endl;
+        } else if (paymentMethod == 2) {
+            string address;
+            cout << "Enter delivery address: ";
+            cin.ignore();
+            getline(cin, address);
+            cout << "Order will be delivered to: " << address << endl;
+        } else {
+            cout << "Invalid payment method!" << endl;
+            return;
+        }
+        
+        cout << "\nThank you for ordering from GIK Food Court!" << endl;
+        cartCount = 0;
+        totalAmount = 0;
+    }
+
+public:
+    GIKFood() {
+        initializeFoods();
+    }
+    
+    ~GIKFood() {
+        // Clean up dynamically allocated memory
+        delete[] desiFood;
+        delete[] fastFood;
+        delete[] chineseFood;
+        delete[] drinks;
+        delete[] desserts;
+        delete[] cart;
+    }
+    
+    void startOrdering() {
+        int choice;
+        char continueOrdering = 'y';
+        
+        do {
+            cout << "\n===== GIK FOOD COURT =====" << endl;
+            cout << "1. Desi Foods" << endl;
+            cout << "2. Fast Foods" << endl;
+            cout << "3. Chinese Foods" << endl;
+            cout << "4. Drinks" << endl;
+            cout << "5. Desserts" << endl;
+            cout << "6. View Cart" << endl;
+            cout << "7. Checkout" << endl;
+            cout << "8. Exit" << endl;
+            cout << "Enter your choice: ";
+            cin >> choice;
+            
+            switch(choice) {
+                case 1: {
+                    cout << "\nDESI FOODS:" << endl;
+                    displayCategory(desiFood, desiCount);
+                    if (desiCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= desiCount) {
+                            cout << "Enter quantity (" << desiFood[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(desiFood[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 2: {
+                    cout << "\nFAST FOODS:" << endl;
+                    displayCategory(fastFood, fastCount);
+                    if (fastCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= fastCount) {
+                            cout << "Enter quantity (" << fastFood[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(fastFood[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 3: {
+                    cout << "\nCHINESE FOODS:" << endl;
+                    displayCategory(chineseFood, chineseCount);
+                    if (chineseCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= chineseCount) {
+                            cout << "Enter quantity (" << chineseFood[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(chineseFood[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 4: {
+                    cout << "\nDRINKS:" << endl;
+                    displayCategory(drinks, drinksCount);
+                    if (drinksCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= drinksCount) {
+                            cout << "Enter quantity (" << drinks[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(drinks[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 5: {
+                    cout << "\nDESSERTS:" << endl;
+                    displayCategory(desserts, dessertsCount);
+                    if (dessertsCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= dessertsCount) {
+                            cout << "Enter quantity (" << desserts[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(desserts[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 6:
+                    displayCart();
+                    break;
+                case 7:
+                    checkout();
+                    continueOrdering = 'n';
+                    break;
+                case 8:
+                    if (cartCount > 0) {
+                        cout << "\nYou have items in your cart!" << endl;
+                        displayCart();
+                        char confirm;
+                        cout << "Are you sure you want to exit without checking out? (y/n): ";
+                        cin >> confirm;
+                        if (confirm == 'n' || confirm == 'N') {
+                            continueOrdering = 'y';
+                            break;
+                        }
+                    }
+                    cout << "Thank you for visiting GIK Food Court!" << endl;
+                    continueOrdering = 'n';
+                    break;
+                default:
+                    cout << "Invalid choice!" << endl;
+            }
+            
+            if (continueOrdering == 'y' && choice != 7 && choice != 8) {
+                cout << "\nContinue ordering? (y/n): ";
+                cin >> continueOrdering;
+            }
+            
+        } while (continueOrdering == 'y' || continueOrdering == 'Y');
+        
+        if (cartCount > 0 && continueOrdering == 'n') {
+            cout << "\nProceeding to checkout..." << endl;
+            checkout();
+        }
+    }
+};
+
+
+
+int main() {
+    AccountValidation AV;
+    AV.validate(); // Class to Validate the User
+
+    char choice;
+    do {
+        showDashboard();
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch(toupper(choice)) {
+            case '1': {
+                GIKgeneralStore store;
+                store.startShopping();
+                break;
+            }
+            case '2':{
+                GIKFood foodCourt;
+                foodCourt.startOrdering();
+                break;
+            }
+                
+            case '3':
+                cout << "Opening Bus Reservation" << endl;
+                
+                break;
+            case '4':
+                cout << "Opening Mess Management" << endl;
+               
+                break;
+            case '5':
+                cout << "Showing Important Timings" << endl;
+                
+                break;
+           
+            case '6':
+                cout << "Lost and Found" << endl;
+        
+                break;
+            case '7':
+                cout << "Complain/Feedback" << endl;
+               
+                break;
+            case 'B':
+        
+                break;
+            case 'X':
+                cout << "THANK YOU! See you Next Time" << endl;
+                return 0;
+            default:
+                cout << "Invalid choice! Try again." << endl;
+        }
+        cout << "Press Enter to continue...";
+        cin.ignore();
+        cin.get();
+    } while (choice != 'X');
+
+    return 0;
+}
