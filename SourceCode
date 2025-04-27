@@ -9,6 +9,27 @@ struct YearNode {
     YearNode* right;
     YearNode(string y) : year(y), left(NULL), right(NULL) {}
 };
+// Node structure for the linked list
+struct SportTiming {
+    string name;
+    string timing;
+    SportTiming* next;
+
+    SportTiming(string n, string t) : name(n), timing(t), next(NULL) {}
+};
+
+// Node for linked list of reservations
+struct ReservationNode {
+    string city;
+    string ticketType;
+    int seatno;
+    string cardLastFour;
+    int price;
+    ReservationNode* next;
+    
+    ReservationNode(string c, string t, int s, string card, int p) 
+        : city(c), ticketType(t), seatno(s), cardLastFour(card), price(p), next(NULL) {}
+};
 
 class AccountValidation {
 private:
@@ -769,6 +790,248 @@ public:
 };
 
 
+// Binary Search Tree for efficient seat searching
+class SeatBST {
+private:
+    struct SeatNode {
+        int seatno;
+        bool booked;
+        SeatNode* left;
+        SeatNode* right;
+        
+        SeatNode(int s) : seatno(s), booked(false), left(NULL), right(NULL) {}
+    };
+    
+    SeatNode* root;
+    
+    SeatNode* insert(SeatNode* node, int seatno) {
+        if(node == NULL) return new SeatNode(seatno);
+        if(seatno < node->seatno) node->left = insert(node->left, seatno);
+        else if(seatno > node->seatno) node->right = insert(node->right, seatno);
+        return node;
+    }
+    
+    SeatNode* find(SeatNode* node, int seatno) {
+        if(node == NULL || node->seatno == seatno) return node;
+        if(seatno < node->seatno) return find(node->left, seatno);
+        return find(node->right, seatno);
+    }
+    
+public:
+    SeatBST() : root(NULL) {
+        for(int i = 1; i <= 30; i++) {
+            root = insert(root, i);
+        }
+    }
+    
+    bool isSeatAvailable(int seatno) {
+        SeatNode* seat = find(root, seatno);
+        return seat && !seat->booked;
+    }
+    
+    bool bookSeat(int seatno) {
+        SeatNode* seat = find(root, seatno);
+        if(seat && !seat->booked) {
+            seat->booked = true;
+            return true;
+        }
+        return false;
+    }
+    
+    void displayAvailableSeats() {
+        cout << "Available Seats:\n";
+        for(int i = 1; i <= 30; i++) {
+            if(isSeatAvailable(i)) {
+                cout << setw(2) << i << " ";
+                if(i % 10 == 0) cout << endl;
+            }
+        }
+        cout << endl;
+    }
+};
+
+class GIKbusreservation {
+private:
+    ReservationNode* reservationsHead;
+    SeatBST seatManager;
+    
+    string getLastFourDigits(const string& cardno) {
+        return cardno.length() >= 4 ? cardno.substr(cardno.length()-4) : cardno;
+    }
+    
+    void addReservation(const string& city, const string& type, int seatno, 
+                       const string& cardno, int price) {
+        ReservationNode* newNode = new ReservationNode(
+            city, type, seatno, getLastFourDigits(cardno), price);
+        newNode->next = reservationsHead;
+        reservationsHead = newNode;
+    }
+    
+    void displayCities() {
+        cout << "Choose the city:\n";
+        cout << "1. Islamabad | 600 PKR\n";
+        cout << "2. Peshawar | 500 PKR\n";
+        cout << "3. Abotabad | 500 PKR\n";
+    }
+    
+    void displayTicketTypes() {
+        cout << "\nChoose ticket type:\n";
+        cout << "1. One-Way Ticket\n";
+        cout << "2. Round-Trip Ticket\n";
+    }
+    
+    void displayReservationHistory() {
+        if(!reservationsHead) {
+            cout << "No reservations made yet.\n";
+            return;
+        }
+        
+        cout << "\n=== RESERVATION HISTORY ===\n";
+        ReservationNode* current = reservationsHead;
+        while(current) {
+            cout << "City: " << current->city << "\n";
+            cout << "Type: " << current->ticketType << "\n";
+            cout << "Seat: " << current->seatno << "\n";
+            cout << "Price: " << current->price << " PKR\n";
+            cout << "Card: ****-****-****-" << current->cardLastFour << "\n";
+            cout << "-------------------------\n";
+            current = current->next;
+        }
+    }
+    
+public:
+    GIKbusreservation() : reservationsHead(NULL) {}
+    
+    void makeReservation() {
+        string city;
+        string ticketType;
+        int seatno;
+        string cardno;
+        int price;
+        
+        // City selection
+        displayCities();
+        int cityChoice;
+        cout << "\nEnter city choice (1-3): ";
+        cin >> cityChoice;
+        
+        switch(cityChoice) {
+            case 1: city = "Islamabad"; price = 600; break;
+            case 2: city = "Peshawar"; price = 500; break;
+            case 3: city = "Abotabad"; price = 500; break;
+            default: 
+                cout << "Invalid choice!\n";
+                return;
+        }
+
+        // Ticket type selection
+        displayTicketTypes();
+        int ticketChoice;
+        cout << "Enter ticket type (1-2): ";
+        cin >> ticketChoice;
+        
+        if(ticketChoice == 1) ticketType = "One-Way";
+        else if(ticketChoice == 2) {
+            ticketType = "Round-Trip";
+            price *= 2;
+        }
+        else {
+            cout << "Invalid choice!\n";
+            return;
+        }
+
+        // Seat selection
+        seatManager.displayAvailableSeats();
+        cout << "\nEnter Seat Number (1-30): ";
+        cin >> seatno;
+        
+        if(seatno < 1 || seatno > 30) {
+            cout << "Invalid seat number!\n";
+            return;
+        }
+        
+        if(!seatManager.bookSeat(seatno)) {
+            cout << "Seat already booked!\n";
+            return;
+        }
+        
+        // Payment
+        cout << "Enter Card Number for Payment: ";
+        cin.ignore();
+        getline(cin, cardno);
+
+        // Store reservation
+        addReservation(city, ticketType, seatno, cardno, price);
+        
+        // Confirmation
+        cout << "\n========= CONFIRMATION =========\n";
+        cout << " CITY: " << city << "\n";
+        cout << " SEAT: " << seatno << "\n";
+        cout << " TYPE: " << ticketType << "\n";
+        cout << " PRICE: " << price << " PKR\n";
+        cout << " CARD: ****-****-****-" << getLastFourDigits(cardno) << "\n";
+        cout << "===============================\n";
+        cout << "Reservation successful!\n";
+    }
+    
+    void showMenu() {
+        while(true) {
+            cout << "\n===== GIKI BUS RESERVATION =====";
+            cout << "\n1. Make Reservation";
+            cout << "\n2. View Reservation History";
+            cout << "\n3. Exit";
+            cout << "\nEnter choice (1-3): ";
+            
+            int choice;
+            cin >> choice;
+            
+            switch(choice) {
+                case 1: makeReservation(); break;
+                case 2: displayReservationHistory(); break;
+                case 3: return;
+                default: cout << "Invalid choice!\n";
+            }
+        }
+    }
+};
+
+
+class GIKTimings {
+private:
+    SportTiming* head; // Head of the linked list
+
+public:
+    GIKTimings() {
+        // Initialize the linked list with sports timings
+        head = new SportTiming("Basketball", "6PM to 7PM");
+        head->next = new SportTiming("Volleyball", "7PM to 8PM");
+        head->next->next = new SportTiming("Table Tennis", "8PM to 9PM");
+        head->next->next->next = new SportTiming("Snooker", "9PM to 10PM");
+        head->next->next->next->next = new SportTiming("Squash", "10PM to 11PM");
+    }
+
+    void showTimings() {
+        cout << "Students Sports Complex Timings\n";
+        cout << "-----------------------------\n";
+        
+        SportTiming* current = head;
+        while (current != NULL) {
+            cout << current->name << ": " << current->timing << endl;
+            current = current->next;
+        }
+    }
+
+    ~GIKTimings() {
+        // Clean up memory (delete all nodes)
+        SportTiming* current = head;
+        while (current != NULL) {
+            SportTiming* temp = current;
+            current = current->next;
+            delete temp;
+        }
+    }
+};
+
 
 int main() {
     AccountValidation AV;
@@ -793,18 +1056,21 @@ int main() {
             }
                 
             case '3':
-                cout << "Opening Bus Reservation" << endl;
-                
-                break;
+               {
+            	 GIKbusreservation system;
+                 system.showMenu();
+				 break;
+			}
             case '4':
                 cout << "Opening Mess Management" << endl;
                
                 break;
             case '5':
-                cout << "Showing Important Timings" << endl;
-                
-                break;
-           
+                   {    GIKTimings timings;
+                  timings.showTimings();  
+                   break;
+			 }
+              
             case '6':
                 cout << "Lost and Found" << endl;
         
