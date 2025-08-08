@@ -1,1 +1,1321 @@
+//Header File
+#include<iostream>
+#include<string>
+#include<iomanip>
+using namespace std;
 
+// AccountValidation----Using Binary Search Tree
+struct YearNode {
+    string year;
+    YearNode* left;
+    YearNode* right;
+    YearNode(string y) : year(y), left(NULL), right(NULL) {}
+};
+// Sports Timing ------Node structure for the linked list
+struct SportTiming {
+    string name;
+    string timing;
+    SportTiming* next;
+    SportTiming(string n, string t) : name(n), timing(t), next(NULL) {}
+};
+//Bus Reservation------- Node for linked list of reservations
+struct ReservationNode {
+    string city;
+    string ticketType;
+    int seatno;
+    string cardLastFour;
+    int price;
+    ReservationNode* next;
+    
+    ReservationNode(string c, string t, int s, string card, int p) : city(c), ticketType(t), seatno(s), cardLastFour(card), price(p), next(NULL) {}
+};
+// Node for Menu
+struct MenuNode {
+    string day;
+    string breakfast, lunch, dinner;
+    MenuNode* left;
+    MenuNode* right;
+
+    MenuNode(string d, string b, string l, string dn): day(d), breakfast(b), lunch(l), dinner(dn), left(NULL), right(NULL) {}
+};
+ //Account Validation Class
+class AccountValidation {
+private:
+    YearNode* root;
+
+    YearNode* insert(YearNode* node, string year) {
+        if (node == NULL) return new YearNode(year);
+        if (year < node->year) node->left = insert(node->left, year);
+        else if (year > node->year) node->right = insert(node->right, year);
+        return node;
+    }
+
+    bool search(YearNode* node, string year) {
+        if (node == NULL) return false;
+        if (year == node->year) return true;
+        if (year < node->year) return search(node->left, year);
+        else return search(node->right, year);
+    }
+
+public:
+    AccountValidation() {
+        root = NULL;
+        root = insert(root, "2021");
+        insert(root, "2022");
+        insert(root, "2023");
+        insert(root, "2024");
+    }
+
+    bool validatePassword(string password) {
+        if (password.length() < 7) return false;
+        string firstFour = password.substr(0, 4);
+        return search(root, firstFour);
+    }
+
+    void validate() {
+        string username, password;
+        cout << "Enter Username: ";
+        cin >> username;
+        cout << "Enter Password: ";
+        cin >> password;
+
+        if (validatePassword(password)) {
+            cout << "WELCOME!" << endl;
+        } else {
+            cout << "Invalid! You are not a registered student." << endl;
+            exit(0); // Exit if login fails
+        }
+    }
+};
+// Class for General Store
+class GIKgeneralStore {
+private:
+    struct Product {
+        string name;
+        double price;
+        string unit;
+    };
+
+    // Dynamic arrays for product categories
+    Product* dairyProducts;
+    Product* fruitProducts;
+    Product* vegetableProducts;
+    Product* miscProducts;
+    
+    int dairyCapacity = 10;
+    int fruitCapacity = 10;
+    int vegetableCapacity = 10;
+    int miscCapacity = 10;
+    
+    int dairyCount = 0;
+    int fruitCount = 0;
+    int vegetableCount = 0;
+    int miscCount = 0;
+    
+    struct CartItem {
+        Product product;
+        double quantity;
+    };
+    
+    CartItem* cart;
+    int cartCapacity = 50;
+    int cartCount = 0;
+    double totalAmount = 0;
+    
+    void initializeProducts() {
+        // Allocate memory for product categories
+        dairyProducts = new Product[dairyCapacity];
+        fruitProducts = new Product[fruitCapacity];
+        vegetableProducts = new Product[vegetableCapacity];
+        miscProducts = new Product[miscCapacity];
+        
+        // Initialize cart
+        cart = new CartItem[cartCapacity];
+        
+        // Dairy Products
+        addDairyProduct("Milk", 350, "liter");
+        addDairyProduct("Butter", 500, "kg");
+        addDairyProduct("Bread", 250, "packet");
+        
+        // Fruits
+        addFruitProduct("Pomegranate", 400, "kg");
+        addFruitProduct("Mango", 300, "kg");
+        addFruitProduct("Banana", 200, "dozen");
+        addFruitProduct("Apples", 250, "kg");
+        
+        // Vegetables
+        addVegetableProduct("Potato", 200, "kg");
+        addVegetableProduct("Carrot", 250, "kg");
+        addVegetableProduct("Cucumber", 150, "kg");
+        
+        
+        addMiscProduct("Eggs", 120, "dozen");
+        addMiscProduct("Rice", 300, "kg");
+    }
+    
+    void resizeCategory(Product*& products, int& capacity, int count) {
+        int newCapacity = capacity * 2;
+        Product* newProducts = new Product[newCapacity];
+        
+        for (int i = 0; i < count; i++) {
+            newProducts[i] = products[i];
+        }
+        
+        delete[] products;
+        products = newProducts;
+        capacity = newCapacity;
+    }
+    
+    void addDairyProduct(string name, double price, string unit) {
+        if (dairyCount == dairyCapacity) {
+            resizeCategory(dairyProducts, dairyCapacity, dairyCount); }
+        dairyProducts[dairyCount++] = {name, price, unit};
+    }
+    
+    void addFruitProduct(string name, double price, string unit) {
+        if (fruitCount == fruitCapacity) {
+            resizeCategory(fruitProducts, fruitCapacity, fruitCount);}
+        fruitProducts[fruitCount++] = {name, price, unit};
+    }
+    
+    void addVegetableProduct(string name, double price, string unit) {
+        if (vegetableCount == vegetableCapacity) {
+            resizeCategory(vegetableProducts, vegetableCapacity, vegetableCount);
+        }
+        vegetableProducts[vegetableCount++] = {name, price, unit};
+    }
+    
+    void addMiscProduct(string name, double price, string unit) {
+        if (miscCount == miscCapacity) {
+            resizeCategory(miscProducts, miscCapacity, miscCount);
+        }
+        miscProducts[miscCount++] = {name, price, unit};
+    }
+    
+    void displayCategory(Product* products, int count) {
+        for (int i = 0; i < count; i++) {
+            cout << i+1 << ". " << products[i].name << " - " 
+                 << products[i].price << "/" << products[i].unit << endl;
+        }
+    }
+    
+    void addToCart(Product product, double quantity) {
+        if (cartCount == cartCapacity) {
+            cout << "Cart is full!" << endl;
+            return;
+        }
+        cart[cartCount++] = {product, quantity};
+        totalAmount += product.price * quantity;
+        cout << "Added to cart: " << quantity << " " << product.unit 
+             << " of " << product.name << endl;
+    }
+    
+    void displayCart() {
+        if (cartCount == 0) {
+            cout << "Your cart is empty!" << endl;
+            return;
+        }
+        
+        cout << "\n===== YOUR CART =====" << endl;
+        for (int i = 0; i < cartCount; i++) {
+            cout << cart[i].product.name << " - " << cart[i].quantity << " " << cart[i].product.unit << " x " << cart[i].product.price  << " = " << cart[i].quantity * cart[i].product.price << endl;
+        }
+        cout << "TOTAL: " << totalAmount << endl;
+        cout << "=====================" << endl;
+    }
+    
+    void checkout() {
+        if (cartCount == 0) {
+            cout << "Cannot checkout - cart is empty!" << endl;
+            return;
+        }
+        
+        displayCart();
+        int paymentMethod;
+        cout << "\nSelect payment method:" << endl;
+        cout << "1. Online" << endl;
+        cout << "2. Cash on Delivery" << endl;
+        cout << "Enter choice: ";
+        cin >> paymentMethod;
+        
+        if (paymentMethod == 1) {
+            cout << "Please send " << totalAmount << " to 03xx-xxxxxxx" << endl;
+        } else if (paymentMethod == 2) {
+            string address;
+            cout << "Enter delivery address: ";
+            cin.ignore();
+            getline(cin, address);
+            cout << "Order will be delivered to: " << address << endl;
+        } else {
+            cout << "Invalid payment method!" << endl;
+            return;
+        }
+        cout << "\nThank you for shopping with us!" << endl;
+        cartCount = 0;
+        totalAmount = 0;
+    }
+public:
+    GIKgeneralStore() {
+        initializeProducts();
+    }
+    
+    ~GIKgeneralStore() {
+        // Clean up dynamically allocated memory
+        delete[] dairyProducts;
+        delete[] fruitProducts;
+        delete[] vegetableProducts;
+        delete[] miscProducts;
+        delete[] cart;
+    }
+    
+    void startShopping() {
+        int choice;
+        char continueShopping = 'y';
+        
+        do {
+            cout << "\n===== GIK GENERAL STORE =====" << endl;
+            cout << "1. Dairy Products" << endl;
+            cout << "2. Fruits" << endl;
+            cout << "3. Vegetables" << endl;
+            cout << "4. Miscellaneous Items" << endl;
+            cout << "5. View Cart" << endl;
+            cout << "6. Checkout" << endl;
+            cout << "7. Exit" << endl;
+            cout << "Enter your choice: ";
+            cin >> choice;
+            
+switch(choice) {
+case 1: {
+            cout << "\nDAIRY PRODUCTS:" << endl;
+            displayCategory(dairyProducts, dairyCount);
+            if (dairyCount > 0) {
+            int item;
+            double quantity;
+            cout << "Select item: ";
+            cin >> item;
+            if (item > 0 && item <= dairyCount) {
+            cout << "Enter quantity (" << dairyProducts[item-1].unit << "): ";
+            cin >> quantity;
+            addToCart(dairyProducts[item-1], quantity);
+            } else {
+            cout << "Invalid selection!" << endl;}
+            }
+                    break;
+                }
+case 2: {
+            cout << "\nFRUITS:" << endl;
+            displayCategory(fruitProducts, fruitCount);
+            if (fruitCount > 0) {
+            int item;
+            double quantity;
+            cout << "Select item: ";
+            cin >> item;
+            if (item > 0 && item <= fruitCount) {
+            cout << "Enter quantity (" << fruitProducts[item-1].unit << "): ";
+            cin >> quantity;
+            addToCart(fruitProducts[item-1], quantity);
+            } else {
+            cout << "Invalid selection!" << endl;
+             }
+            }
+            break;
+                }
+            case 3: {
+            cout << "\nVEGETABLES:" << endl;
+            displayCategory(vegetableProducts, vegetableCount);
+                    if (vegetableCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= vegetableCount) {
+                            cout << "Enter quantity (" << vegetableProducts[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(vegetableProducts[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+ case 4: {
+        cout << "\nMISCELLANEOUS ITEMS:" << endl;
+        displayCategory(miscProducts, miscCount);
+      if (miscCount > 0) {
+         int item;
+         double quantity;
+        cout << "Select item: ";
+           cin >> item;
+         if (item > 0 && item <= miscCount) {
+       cout << "Enter quantity (" << miscProducts[item-1].unit << "): ";
+         cin >> quantity;
+        addToCart(miscProducts[item-1], quantity);
+        } else {
+         cout << "Invalid selection!" << endl;
+        }
+                    }
+                    break;
+                }
+case 5:
+                    displayCart();
+                    break;
+case 6:
+                    checkout();
+                    continueShopping = 'n'; // Exit after checkout
+                    break;
+case 7:
+                    if (cartCount > 0) {
+                        cout << "\nYou have items in your cart!" << endl;
+                        displayCart();
+                        char confirm;
+                        cout << "Are you sure you want to exit without checking out? (y/n): ";
+                        cin >> confirm;
+                        if (confirm == 'n' || confirm == 'N') {
+                            continueShopping = 'y';
+                            break;
+                        }
+                    }
+                    cout << "Thank you for visiting!" << endl;
+                    continueShopping = 'n';
+                    break;
+                default:
+                    cout << "Invalid choice!" << endl;
+            }
+            
+            if (continueShopping == 'y' && choice != 6 && choice != 7) {
+                cout << "\nContinue shopping? (y/n): ";
+                cin >> continueShopping;
+            }
+            
+        } while (continueShopping == 'y' || continueShopping == 'Y');
+        
+        // If user chose to stop shopping but hasn't checked out
+        if (cartCount > 0 && continueShopping == 'n') {
+            cout << "\nProceeding to checkout..." << endl;
+            checkout();
+        }
+    }
+};
+//Class For Managing Food Items
+class GIKFood {
+private:
+    struct Food {
+        string name;
+        double price;
+        string unit;
+    };
+
+    // Dynamic arrays for food categories
+    Food* desiFood;
+    Food* fastFood;
+    Food* chineseFood;
+    Food* drinks;
+    Food* desserts;
+    
+    int desiCapacity = 10;
+    int fastCapacity = 10;
+    int chineseCapacity = 10;
+    int drinksCapacity = 10;
+    int dessertsCapacity = 10;
+    
+    int desiCount = 0;
+    int fastCount = 0;
+    int chineseCount = 0;
+    int drinksCount = 0;
+    int dessertsCount = 0;
+    
+    struct CartItem {
+        Food food;
+        double quantity;
+    };
+    
+    CartItem* cart;
+    int cartCapacity = 50;
+    int cartCount = 0;
+    double totalAmount = 0;
+    
+    void initializeFoods() {
+        // Allocate memory for food categories
+        desiFood = new Food[desiCapacity];
+        fastFood = new Food[fastCapacity];
+        chineseFood = new Food[chineseCapacity];
+        drinks = new Food[drinksCapacity];
+        desserts = new Food[dessertsCapacity];
+        
+        // Initialize cart
+        cart = new CartItem[cartCapacity];
+        
+        // Desi Foods
+        addDesiFood("Biryani", 350, "Plate");
+        addDesiFood("Karhai", 400, "Plate");
+        addDesiFood("Korma", 300, "Plate");
+        addDesiFood("Daal Chawal", 150, "Plate");
+        addDesiFood("Nihari", 250, "Plate");
+        
+        // Fast Foods
+        addFastFood("Zinger Burger", 300, "Piece");
+        addFastFood("Pizza", 1400, "Large");
+        addFastFood("Fries", 200, "Regular");
+        addFastFood("Chicken Wings", 450, "6 Pieces");
+        addFastFood("Club Sandwich", 350, "Piece");
+        
+        // Chinese Foods
+        addChineseFood("Chinese Rice", 200, "Plate");
+        addChineseFood("Chow Mein", 250, "Plate");
+        addChineseFood("Hot & Sour Soup", 180, "Bowl");
+        addChineseFood("Spring Rolls", 220, "4 Pieces");
+        addChineseFood("Manchurian", 280, "Plate");
+        
+        // Drinks
+        addDrink("Mango Shake", 220, "Glass");
+        addDrink("Cold Coffee", 220, "Glass");
+        addDrink("Soft Drink", 80, "Can");
+        addDrink("Mineral Water", 60, "Bottle");
+        addDrink("Fresh Lime", 120, "Glass");
+        
+        // Desserts
+        addDessert("Gulab Jamun", 80, "Piece");
+        addDessert("Kheer", 120, "Bowl");
+        addDessert("Ice Cream", 150, "Scoop");
+        addDessert("Cake", 200, "Slice");
+        addDessert("Jalebi", 100, "100g");
+    }
+    
+    void resizeCategory(Food*& foods, int& capacity, int count) {
+        int newCapacity = capacity * 2;
+        Food* newFoods = new Food[newCapacity];
+        
+        for (int i = 0; i < count; i++) {
+            newFoods[i] = foods[i];
+        }
+        
+        delete[] foods;
+        foods = newFoods;
+        capacity = newCapacity;
+    }
+    
+    void addDesiFood(string name, double price, string unit) {
+        if (desiCount == desiCapacity) {
+            resizeCategory(desiFood, desiCapacity, desiCount);
+        }
+        desiFood[desiCount++] = {name, price, unit};
+    }
+    
+    void addFastFood(string name, double price, string unit) {
+        if (fastCount == fastCapacity) {
+            resizeCategory(fastFood, fastCapacity, fastCount);
+        }
+        fastFood[fastCount++] = {name, price, unit};
+    }
+    
+    void addChineseFood(string name, double price, string unit) {
+        if (chineseCount == chineseCapacity) {
+            resizeCategory(chineseFood, chineseCapacity, chineseCount);
+        }
+        chineseFood[chineseCount++] = {name, price, unit};
+    }
+    
+    void addDrink(string name, double price, string unit) {
+        if (drinksCount == drinksCapacity) {
+            resizeCategory(drinks, drinksCapacity, drinksCount);
+        }
+        drinks[drinksCount++] = {name, price, unit};
+    }
+    
+    void addDessert(string name, double price, string unit) {
+        if (dessertsCount == dessertsCapacity) {
+            resizeCategory(desserts, dessertsCapacity, dessertsCount);
+        }
+        desserts[dessertsCount++] = {name, price, unit};
+    }
+    
+    void displayCategory(Food* foods, int count) {
+        for (int i = 0; i < count; i++) {
+            cout << i+1 << ". " << foods[i].name << " - " << foods[i].price << " Rs/" << foods[i].unit << endl;
+        }
+    }
+    
+    void addToCart(Food food, double quantity) {
+        if (cartCount == cartCapacity) {
+        cout << "Cart is full!" << endl;
+            return;
+        }
+        cart[cartCount++] = {food, quantity};
+        totalAmount += food.price * quantity;
+        cout << "Added to cart: " << quantity << " " << food.unit << " of " << food.name << endl;
+    }
+    
+    void displayCart() {
+        if (cartCount == 0) {
+            cout << "Your cart is empty!" << endl;
+            return;
+        }
+        
+        cout << "\n===== YOUR CART =====" << endl;
+        for (int i = 0; i < cartCount; i++) {
+            cout << cart[i].food.name << " - " << cart[i].quantity << " " << cart[i].food.unit << " x " << cart[i].food.price << " = " << cart[i].quantity * cart[i].food.price << " Rs" << endl;
+        }
+        cout << "TOTAL: " << totalAmount << " Rs" << endl;
+        cout << "=====================" << endl;
+    }
+    
+    void checkout() {
+        if (cartCount == 0) {
+            cout << "Cannot checkout - cart is empty!" << endl;
+            return;
+        }
+        
+        displayCart();
+        
+        int paymentMethod;
+        cout << "\nSelect payment method:" << endl;
+        cout << "1. Online" << endl;
+        cout << "2. Cash on Delivery" << endl;
+        cout << "Enter choice: ";
+        cin >> paymentMethod;
+        
+        if (paymentMethod == 1) {
+            cout << "Please send " << totalAmount << " Rs to 03xx-xxxxxxx" << endl;
+        } else if (paymentMethod == 2) {
+            string address;
+            cout << "Enter delivery address: ";
+            cin.ignore();
+            getline(cin, address);
+            cout << "Order will be delivered to: " << address << endl;
+        } else {
+            cout << "Invalid payment method!" << endl;
+            return;
+        }
+        
+        cout << "\nThank you for ordering from GIK Food Court!" << endl;
+        cartCount = 0;
+        totalAmount = 0;
+    }
+
+public:
+    GIKFood() {
+        initializeFoods();
+    }
+    
+    ~GIKFood() {
+        // Clean up dynamically allocated memory
+        delete[] desiFood;
+        delete[] fastFood;
+        delete[] chineseFood;
+        delete[] drinks;
+        delete[] desserts;
+        delete[] cart;
+    }
+    
+    void startOrdering() {
+        int choice;
+        char continueOrdering = 'y';
+        
+        do {
+            cout << "\n===== GIK FOOD COURT =====" << endl;
+            cout << "1. Desi Foods" << endl;
+            cout << "2. Fast Foods" << endl;
+            cout << "3. Chinese Foods" << endl;
+            cout << "4. Drinks" << endl;
+            cout << "5. Desserts" << endl;
+            cout << "6. View Cart" << endl;
+            cout << "7. Checkout" << endl;
+            cout << "8. Exit" << endl;
+            cout << "Enter your choice: ";
+            cin >> choice;
+            
+            switch(choice) {
+                case 1: {
+                    cout << "\nDESI FOODS:" << endl;
+                    displayCategory(desiFood, desiCount);
+                    if (desiCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= desiCount) {
+                            cout << "Enter quantity (" << desiFood[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(desiFood[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 2: {
+                    cout << "\nFAST FOODS:" << endl;
+                    displayCategory(fastFood, fastCount);
+                    if (fastCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= fastCount) {
+                            cout << "Enter quantity (" << fastFood[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(fastFood[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 3: {
+                    cout << "\nCHINESE FOODS:" << endl;
+                    displayCategory(chineseFood, chineseCount);
+                    if (chineseCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= chineseCount) {
+                            cout << "Enter quantity (" << chineseFood[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(chineseFood[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 4: {
+                    cout << "\nDRINKS:" << endl;
+                    displayCategory(drinks, drinksCount);
+                    if (drinksCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= drinksCount) {
+                            cout << "Enter quantity (" << drinks[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(drinks[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 5: {
+                    cout << "\nDESSERTS:" << endl;
+                    displayCategory(desserts, dessertsCount);
+                    if (dessertsCount > 0) {
+                        int item;
+                        double quantity;
+                        cout << "Select item: ";
+                        cin >> item;
+                        if (item > 0 && item <= dessertsCount) {
+                            cout << "Enter quantity (" << desserts[item-1].unit << "): ";
+                            cin >> quantity;
+                            addToCart(desserts[item-1], quantity);
+                        } else {
+                            cout << "Invalid selection!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 6:
+                    displayCart();
+                    break;
+                case 7:
+                    checkout();
+                    continueOrdering = 'n';
+                    break;
+                case 8:
+                    if (cartCount > 0) {
+                        cout << "\nYou have items in your cart!" << endl;
+                        displayCart();
+                        char confirm;
+                        cout << "Are you sure you want to exit without checking out? (y/n): ";
+                        cin >> confirm;
+                        if (confirm == 'n' || confirm == 'N') {
+                            continueOrdering = 'y';
+                            break;
+                        }
+                    }
+                    cout << "Thank you for visiting GIK Food Court!" << endl;
+                    continueOrdering = 'n';
+                    break;
+                default:
+                    cout << "Invalid choice!" << endl;
+            }
+            
+            if (continueOrdering == 'y' && choice != 7 && choice != 8) {
+                cout << "\nContinue ordering? (y/n): ";
+                cin >> continueOrdering;
+            }
+            
+        } while (continueOrdering == 'y' || continueOrdering == 'Y');
+        
+        if (cartCount > 0 && continueOrdering == 'n') {
+            cout << "\nProceeding to checkout..." << endl;
+            checkout();
+        }
+    }
+};
+
+// Class for Seats------- Using Binary Search Tress
+class SeatBST {
+private:
+    struct SeatNode {
+        int seatno;
+        bool booked;
+        SeatNode* left;
+        SeatNode* right;
+        
+        SeatNode(int s) : seatno(s), booked(false), left(NULL), right(NULL) {}
+    };
+    
+    SeatNode* root;
+    
+    SeatNode* insert(SeatNode* node, int seatno) {
+        if(node == NULL) return new SeatNode(seatno);
+        if(seatno < node->seatno) node->left = insert(node->left, seatno);
+        else if(seatno > node->seatno) node->right = insert(node->right, seatno);
+        return node;
+    }
+    
+    SeatNode* find(SeatNode* node, int seatno) {
+        if(node == NULL || node->seatno == seatno) return node;
+        if(seatno < node->seatno) return find(node->left, seatno);
+        return find(node->right, seatno);
+    }
+    
+public:
+    SeatBST() : root(NULL) {
+        for(int i = 1; i <= 30; i++) {
+            root = insert(root, i);
+        }
+    }
+    
+    bool isSeatAvailable(int seatno) {
+        SeatNode* seat = find(root, seatno);
+        return seat && !seat->booked;
+    }
+    
+    bool bookSeat(int seatno) {
+        SeatNode* seat = find(root, seatno);
+        if(seat && !seat->booked) {
+            seat->booked = true;
+            return true;
+        }
+        return false;
+    }
+    
+    void displayAvailableSeats() {
+        cout << "Available Seats:\n";
+        for(int i = 1; i <= 30; i++) {
+            if(isSeatAvailable(i)) {
+                cout << setw(2) << i << " ";
+                if(i % 10 == 0) cout << endl;
+            }
+        }
+        cout << endl;
+    }
+};
+//Class for Bus Resercation Module
+class GIKbusreservation {
+private:
+    ReservationNode* reservationsHead;
+    SeatBST seatManager;
+    
+    string getLastFourDigits(const string& cardno) {
+        return cardno.length() >= 4 ? cardno.substr(cardno.length()-4) : cardno;
+    }
+    
+    void addReservation(const string& city, const string& type, int seatno, 
+                       const string& cardno, int price) {
+        ReservationNode* newNode = new ReservationNode(
+            city, type, seatno, getLastFourDigits(cardno), price);
+        newNode->next = reservationsHead;
+        reservationsHead = newNode;
+    }
+    
+    void displayCities() {
+        cout << "Choose the city:\n";
+        cout << "1. Islamabad | 600 PKR\n";
+        cout << "2. Peshawar | 500 PKR\n";
+        cout << "3. Abotabad | 500 PKR\n";
+    }
+    
+    void displayTicketTypes() {
+        cout << "\nChoose ticket type:\n";
+        cout << "1. One-Way Ticket\n";
+        cout << "2. Round-Trip Ticket\n";
+    }
+    
+    void displayReservationHistory() {
+        if(!reservationsHead) {
+            cout << "No reservations made yet.\n";
+            return;
+        }
+        
+        cout << "\n=== RESERVATION HISTORY ===\n";
+        ReservationNode* current = reservationsHead;
+        while(current) {
+            cout << "City: " << current->city << "\n";
+            cout << "Type: " << current->ticketType << "\n";
+            cout << "Seat: " << current->seatno << "\n";
+            cout << "Price: " << current->price << " PKR\n";
+            cout << "Card: ****-****-****-" << current->cardLastFour << "\n";
+            cout << "-------------------------\n";
+            current = current->next;
+        }
+    }
+    
+public:
+    GIKbusreservation() : reservationsHead(NULL) {}
+    
+    void makeReservation() {
+        string city;
+        string ticketType;
+        int seatno;
+        string cardno;
+        int price;
+        
+        // City selection
+        displayCities();
+        int cityChoice;
+        cout << "\nEnter city choice (1-3): ";
+        cin >> cityChoice;
+        
+        switch(cityChoice) {
+            case 1: city = "Islamabad"; price = 600; break;
+            case 2: city = "Peshawar"; price = 500; break;
+            case 3: city = "Abotabad"; price = 500; break;
+            default: 
+                cout << "Invalid choice!\n";
+                return;
+        }
+
+        // Ticket type selection
+        displayTicketTypes();
+        int ticketChoice;
+        cout << "Enter ticket type (1-2): ";
+        cin >> ticketChoice;
+        
+        if(ticketChoice == 1) ticketType = "One-Way";
+        else if(ticketChoice == 2) {
+            ticketType = "Round-Trip";
+            price *= 2;
+        }
+        else {
+            cout << "Invalid choice!\n";
+            return;
+        }
+
+        // Seat selection
+        seatManager.displayAvailableSeats();
+        cout << "\nEnter Seat Number (1-30): ";
+        cin >> seatno;
+        
+        if(seatno < 1 || seatno > 30) {
+            cout << "Invalid seat number!\n";
+            return;
+        }
+        
+        if(!seatManager.bookSeat(seatno)) {
+            cout << "Seat already booked!\n";
+            return;
+        }
+        
+        // Payment
+        cout << "Enter Card Number for Payment: ";
+        cin.ignore();
+        getline(cin, cardno);
+
+        // Store reservation
+        addReservation(city, ticketType, seatno, cardno, price);
+        
+        // Confirmation
+        cout << "\n========= CONFIRMATION =========\n";
+        cout << " CITY: " << city << "\n";
+        cout << " SEAT: " << seatno << "\n";
+        cout << " TYPE: " << ticketType << "\n";
+        cout << " PRICE: " << price << " PKR\n";
+        cout << " CARD: ****-****-****-" << getLastFourDigits(cardno) << "\n";
+        cout << "===============================\n";
+        cout << "Reservation successful!\n";
+    }
+    
+    void showMenu() {
+        while(true) {
+            cout << "\n===== GIKI BUS RESERVATION =====";
+            cout << "\n1. Make Reservation";
+            cout << "\n2. View Reservation History";
+            cout << "\n3. Exit";
+            cout << "\nEnter choice (1-3): ";
+            
+            int choice;
+            cin >> choice;
+            
+            switch(choice) {
+                case 1: makeReservation(); break;
+                case 2: displayReservationHistory(); break;
+                case 3: return;
+                default: cout << "Invalid choice!\n";
+            }
+        }
+    }
+};
+
+//Class for Displaying Timings
+class GIKTimings {
+private:
+    SportTiming* head; // Head of the linked list
+
+public:
+    GIKTimings() {
+        // Initialize the linked list with sports timings
+        head = new SportTiming("Basketball", "6PM to 7PM");
+        head->next = new SportTiming("Volleyball", "7PM to 8PM");
+        head->next->next = new SportTiming("Table Tennis", "8PM to 9PM");
+        head->next->next->next = new SportTiming("Snooker", "9PM to 10PM");
+        head->next->next->next->next = new SportTiming("Squash", "10PM to 11PM");
+    }
+
+    void showTimings() {
+        cout << "Students Sports Complex Timings\n";
+        cout << "-----------------------------\n";
+        
+        SportTiming* current = head;
+        while (current != NULL) {
+            cout << current->name << ": " << current->timing << endl;
+            current = current->next;
+        }
+    }
+
+    ~GIKTimings() {
+        // Clean up memory (delete all nodes)
+        SportTiming* current = head;
+        while (current != NULL) {
+            SportTiming* temp = current;
+            current = current->next;
+            delete temp;
+        }
+    }
+};
+
+
+
+// Managing Menu--------Using Trees
+class MenuTree {
+private:
+    MenuNode* root;
+
+    //  to insert node alphabetically by day
+    MenuNode* insert(MenuNode* node, string day, string b, string l, string d) {
+        if (!node)
+            return new MenuNode(day, b, l, d);
+        if (day < node->day)
+            node->left = insert(node->left, day, b, l, d);
+        else
+            node->right = insert(node->right, day, b, l, d);
+        return node;
+    }
+
+    // In-order display
+    void displayInOrder(MenuNode* node) {
+        if (!node) return;
+        displayInOrder(node->left);
+        cout << left << setw(12) << node->day
+             << setw(16) << node->breakfast
+             << setw(16) << node->lunch
+             << setw(16) << node->dinner << endl;
+        displayInOrder(node->right);
+    }
+
+    // Search for a specific day's menu
+    MenuNode* search(MenuNode* node, const string& day) {
+        if (!node || node->day == day)
+            return node;
+        if (day < node->day)
+            return search(node->left, day);
+        else
+            return search(node->right, day);
+    }
+
+public:
+    MenuTree() : root(NULL) {}
+
+    void addMenu(string day, string b, string l, string d) {
+        root = insert(root, day, b, l, d);
+    }
+
+    void displayMenu() {
+        cout << "\n--- Weekly Mess Menu ---" << endl;
+        cout << left << setw(12) << "Day"
+             << setw(16) << "Breakfast"
+             << setw(16) << "Lunch"
+             << setw(16) << "Dinner" << endl;
+        displayInOrder(root);
+    }
+
+    void showDayMenu(const string& day) {
+        MenuNode* result = search(root, day);
+        if (result)
+            cout << day << " Menu => Breakfast: " << result->breakfast
+                 << ", Lunch: " << result->lunch
+                 << ", Dinner: " << result->dinner << endl;
+        else
+            cout << "Menu for " << day << " not found." << endl;
+    }
+};
+
+// Class for Mess Management class
+class MessManagement {
+private:
+    MenuTree menu;
+
+public:
+    MessManagement() {
+        // Initialize menu data
+        menu.addMenu("Monday", "Omelette", "Biryani", "Chicken");
+        menu.addMenu("Tuesday", "Paratha", "Daal Chawal", "Kofta");
+        menu.addMenu("Wednesday", "Eggs", "Korma", "Fish");
+        menu.addMenu("Thursday", "Toast", "Pulao", "Chicken Karahi");
+        menu.addMenu("Friday", "Halwa Puri", "Nihari", "BBQ");
+        menu.addMenu("Saturday", "Bread", "Burger", "Pizza");
+        menu.addMenu("Sunday", "Pancakes", "Sandwich", "Pasta");
+    }
+
+    void showMainMenu() {
+        int choice;
+        while (true) {
+            cout << "\n===== Mess Management =====" << endl;
+            cout << "1. Mess Check In/Out" << endl;
+            cout << "2. See Menu" << endl;
+            cout << "3. Mess Timings" << endl;
+            cout << "4. Exit" << endl;
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            switch (choice) {
+                case 1:
+                    checkInOut();
+                    break;
+                case 2:
+                    showMenu();
+                    break;
+                case 3:
+                    displayTimings();
+                    break;
+                case 4:
+                    return;
+                default:
+                    cout << "Invalid choice. Please try again." << endl;
+            }
+        }
+    }
+
+    void checkInOut() {
+        char action;
+        cout << "\n--- Mess Check In/Out ---" << endl;
+        cout << "a. Mess IN" << endl;
+        cout << "b. Mess OUT" << endl;
+        cout << "c. Go Back" << endl;
+        cout << "Enter your action (a/b/c): ";
+        cin >> action;
+
+        switch (action) {
+            case 'a':
+            case 'A':
+                cout << "You have successfully checked IN to the mess." << endl;
+                break;
+            case 'b':
+            case 'B':
+                cout << "You have successfully checked OUT of the mess." << endl;
+                break;
+            case 'c':
+            case 'C':
+                return;
+            default:
+                cout << "Invalid action selected. Returning to main menu." << endl;
+        }
+    }
+
+    void showMenu() {
+        int subChoice;
+        string day;
+        cout << "\n--- Menu Options ---" << endl;
+        cout << "1. Display full weekly menu" << endl;
+        cout << "2. Show menu for a specific day" << endl;
+        cout << "Enter your choice: ";
+        cin >> subChoice;
+        cin.ignore(); // Clear newline from input buffer
+
+        switch (subChoice) {
+            case 1:
+                menu.displayMenu();
+                break;
+            case 2:
+                cout << "Enter the day (e.g., Monday): ";
+                getline(cin, day);
+                menu.showDayMenu(day);
+                break;
+            default:
+                cout << "Invalid option." << endl;
+        }
+    }
+
+    void displayTimings() {
+        cout << "\n--- Mess Timings ---" << endl;
+        cout << "Breakfast: 7:00 AM - 9:00 AM" << endl;
+        cout << "Lunch: 12:00 PM - 2:00 PM" << endl;
+        cout << "Dinner: 7:00 PM - 9:00 PM" << endl;
+    }
+};
+//Class for registering Complain or Feedback
+class Complain {
+private:
+    string msg;
+
+public:
+    void submit() {
+        cout << "Write your complaint here: ";
+        cin.ignore(); // To clear any leftover newline from previous inputs
+        getline(cin, msg);
+        cout << "Thanks for letting us know. Your complaint has been forwarded." << endl;
+    }
+};
+//Class For Lost and FOund
+class LostnFound {
+private:
+    string choice;
+    string itemDetails, contactDetails, name, regNumber, phone;
+    string itemFound;
+
+public:
+    void handleReport() {
+        cout << "Please Choose: " << endl;
+        cout << "L: Lost" << endl;
+        cout << "F: Found" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+        cin.ignore(); // Clear buffer before getline
+
+        if (choice == "L" || choice == "l") {
+            cout << "Write item details: ";
+            getline(cin, itemDetails);
+
+            cout << "Your contact details:" << endl;
+            cout << "Name: ";
+            getline(cin, name);
+
+            cout << "Registration Number: ";
+            getline(cin, regNumber);
+
+            cout << "Phone Number: ";
+            getline(cin, phone);
+
+            cout << "\nWe have submitted your detail to all campus residents." << endl;
+
+        } else if (choice == "F" || choice == "f") {
+            cout << "Enter details of item found: ";
+            getline(cin, itemFound);
+
+            cout << "Enter your phone number: ";
+            getline(cin, phone);
+
+            cout << "\nThanks for letting us know. We have forwarded your message and the owner will contact you soon." << endl;
+
+        } else {
+            cout << "Invalid choice. Please enter 'L' for Lost or 'F' for Found." << endl;
+        }
+    }
+};
+
+
+// Function to clear the screen ---- Provide better UI
+void clearScreen() {
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
+}
+
+// Function to displaying the dashboard
+void showDashboard() {
+    clearScreen();
+    cout << "===== CAMPUS BUDDY DASHBOARD =====" << endl;
+    cout << "1: GIK General Store" << endl;
+    cout << "2: GIK Food Court" << endl;
+    cout << "3: GIK Bus Reservation" << endl;
+    cout << "4: GIK Mess Management" << endl;
+    cout << "5: GIK Important Timings" << endl;
+    cout << "6: GIK Lost and Found" << endl;
+    cout << "7: GIK Complain/Feedback" << endl;
+    cout << "B: Back to Dashboard" << endl;
+    cout << "X: Exit" << endl;
+    cout << "===============================" << endl;
+}
+// Main Program Starts 
+int main() {
+    AccountValidation AV;
+    AV.validate(); // Class to Validate the User
+
+    char choice;
+    do {
+        showDashboard();
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch(toupper(choice)) {
+            case '1': {
+                GIKgeneralStore store;
+                store.startShopping();
+                break;
+            }
+            case '2':{
+                GIKFood foodCourt;
+                foodCourt.startOrdering();
+                break;
+            }
+                
+            case '3':{
+            	 GIKbusreservation system;
+                 system.showMenu();
+				 break;
+			}
+           
+            case '4':
+                {
+				  MessManagement mm;
+                  mm.showMainMenu();
+                  break;}
+            case '5':
+             {    GIKTimings timings;
+                  timings.showTimings();  
+                   break;
+			 }
+              
+           
+            case '6':{
+            	             LostnFound lf;
+                         lf.handleReport();
+				break;
+			}
+    
+            case '7':{
+            	        Complain c;
+                        c.submit();
+				break;
+		}
+            case 'B':
+        
+                break;
+            case 'X':
+                cout << "THANK YOU! See you Next Time" << endl;
+                return 0;
+            default:
+                cout << "Invalid choice! Try again." << endl;
+        }
+        cout << "Press Enter to continue...";
+        cin.ignore();
+        cin.get();
+    } while (choice != 'X');
+
+    return 0;
+}
